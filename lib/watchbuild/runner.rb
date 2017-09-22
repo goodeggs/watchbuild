@@ -62,7 +62,7 @@ module WatchBuild
       UI.message("Build finished processing #{build.app_name}; #{build.train_version} (#{build.build_version})")
 
       UI.message("upload_dsyms started")
-      UI.message(`cd ../persimmon && git pull && bundle exec fastlane refresh_dsyms`)
+      UI.message(`cd ../persimmon && git pull && bundle exec fastlane refresh_dsyms app_identifier:#{WatchBuild.config[:app_identifier]}`)
       UI.success("upload_dsyms finished")
 
       url = "https://itunesconnect.apple.com/WebObjects/iTunesConnect.woa/ra/ng/app/#{@app.apple_id}/activity/ios/builds/#{build.train_version}/#{build.build_version}/details"
