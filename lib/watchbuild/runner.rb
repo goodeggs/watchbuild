@@ -18,7 +18,7 @@ module WatchBuild
       start = Time.now
       build = wait_for_build(start)
       minutes = ((Time.now - start) / 60).round
-      notification(build, minutes)
+      upload_dsyms(build, minutes)
     end
 
     def wait_for_build(start_time)
@@ -53,21 +53,20 @@ module WatchBuild
       nil
     end
 
-    def notification(build, minutes)
-      require 'terminal-notifier'
-
+    def upload_dsyms(build, minutes)
       if build.nil?
         UI.message "Application build is still processing"
         return
       end
 
-      url = "https://itunesconnect.apple.com/WebObjects/iTunesConnect.woa/ra/ng/app/#{@app.apple_id}/activity/ios/builds/#{build.train_version}/#{build.build_version}/details"
-      TerminalNotifier.notify("Build finished processing",
-                              title: build.app_name,
-                           subtitle: "#{build.train_version} (#{build.build_version})",
-                            execute: "open '#{url}'")
+      UI.message("Build finished processing #{build.app_name}; #{build.train_version} (#{build.build_version})")
 
-      UI.success("Successfully finished processing the build")
+      UI.message("upload_dsyms started")
+      UI.message(`cd ../persimmon && git pull && bundle exec fastlane refresh_dsyms`)
+      UI.success("upload_dsyms finished")
+
+      url = "https://itunesconnect.apple.com/WebObjects/iTunesConnect.woa/ra/ng/app/#{@app.apple_id}/activity/ios/builds/#{build.train_version}/#{build.build_version}/details"
+
       if minutes > 0 # it's 0 minutes if there was no new build uploaded
         UI.message("You can now tweet: ")
         UI.important("iTunes Connect #iosprocessingtime #{minutes} minutes")
